@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11100f">
+  <title>Pizza House | Napravi svoju pizzu</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;--panel:#111111ee;--border:#ffffff22;--text:#f8f7f5;--muted:#d4cdc7;--red:#ef2e31;
+      font-family:Inter,system-ui,-apple-system,Arial,sans-serif;color:var(--text);background:var(--bg);font-synthesis:none
+    }
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%}
+    body::before{content:"";position:fixed;inset:0;z-index:-2;background:linear-gradient(90deg,#080705ef,#100f0ce0,#080808f2),url('assets/background.png') center/cover;filter:saturate(.88)}
+    button,input,textarea,select{font:inherit} button{cursor:pointer}
+    .top{height:72px;background:#090909e8;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,72px);gap:20px;position:sticky;top:0;z-index:20;backdrop-filter:blur(10px)}
+    .brand{font-weight:950;font-style:italic;font-size:31px;white-space:nowrap}.brand span{color:var(--red)}
+    .nav{display:flex;gap:28px}.nav a{color:#e4dfdb;text-decoration:none;font-size:14px}.nav .current{color:#ff4848;border-bottom:2px solid #ff4646;padding-bottom:23px;margin-bottom:-23px}
+    .header-cart{border:0;background:var(--red);color:#fff;padding:10px 14px;border-radius:12px;font-weight:800;box-shadow:0 8px 24px #0006}
+    .layout{max-width:1680px;margin:0 auto;padding:26px 28px 52px;display:grid;grid-template-columns:minmax(285px,360px) minmax(320px,1fr) minmax(350px,430px);gap:20px;align-items:start}
+    .lead h1{font-size:clamp(44px,4.3vw,70px);letter-spacing:-2px;line-height:.95;margin:28px 0 14px;font-weight:950}.lead h1 span{color:var(--red)}
+    .lead p{font-size:15px;line-height:1.65;color:var(--muted);margin:0 0 20px}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 16px 32px #0006}
+    .panel h3{margin:0 0 15px;font-size:16px}
+    .size-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#141414;border:1px solid #343434;border-radius:14px;padding:14px 16px}
+    .size-badge{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 35%, #ffd086, #d96e23);box-shadow:inset 0 0 0 5px #8f4b1a,inset 0 0 0 10px #f3b16140;font-size:13px;font-weight:900;color:#2f1302}
+    .size-copy strong{display:block;font-size:17px}.size-copy small{display:block;color:#cfc9c2;margin-top:3px}
+    .info-list{display:grid;gap:10px}.info-pill{display:flex;gap:12px;align-items:flex-start;background:#141414;border:1px solid #303030;border-radius:14px;padding:12px 13px;color:#e7dfd9;font-size:14px;line-height:1.4}
+    .info-pill .emoji{font-size:18px;line-height:1}
+    .pizza-stage{position:sticky;top:92px;display:flex;flex-direction:column;align-items:center;min-width:0;padding-top:12px}
+    .pizza-wrap{width:min(100%,700px);aspect-ratio:1;position:relative;display:grid;place-items:center;filter:drop-shadow(0 22px 38px #000b)}
+    .pizza-wrap::before{content:"";position:absolute;inset:4%;border-radius:50%;background:radial-gradient(circle at 50% 45%, #5e381f 0%, #422616 58%, #2b180f 100%);box-shadow:0 0 0 16px #4a2a1738,0 0 0 24px #b8743020;z-index:0}
+    .pizza-image{position:relative;z-index:1;width:90%;height:90%;object-fit:contain;display:block}
+    #visualToppings{position:absolute;inset:14%;z-index:2}
+    .overlay-layer{position:absolute;inset:0;background-position:center;background-size:100% 100%;background-repeat:no-repeat;pointer-events:none;filter:drop-shadow(0 1px 1px #0004)}
+    .overlay-layer.cheese{inset:2%;z-index:2}
+    .overlay-layer.sauce{z-index:1;opacity:.98}
+    .topping-visual{position:absolute;z-index:3;background-position:center;background-repeat:no-repeat;background-size:contain;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}
+    .tip{text-align:center;font-size:12px;color:#e8d5c2;background:#080808bb;padding:10px 16px;border-radius:999px;margin-top:26px}
+    .builder{background:#0c0c0cf2;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 18px 40px #0008}
+    .builder h2{margin:0 0 16px;font-size:22px}
+    .option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:14px}
+    .option-card{display:flex;align-items:center;text-align:left;gap:10px;padding:11px;background:#191919;border:1px solid #444;color:#fff;border-radius:11px;font-weight:700;font-size:13px}
+    .option-card.active{border:2px solid #f23537;padding:10px;background:#311516}.option-card img{width:48px;height:48px;object-fit:cover;border-radius:50%;background:#131313}.option-card .swatch{width:48px;height:48px;border-radius:50%;background:#8e6a41;flex-shrink:0}
+    .option-card small{display:block;color:#c8c8c8;font-weight:400;margin-top:3px}
+    .ingredients{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .ingredient{background:#141414;border:1px solid #333;border-radius:12px;padding:8px 7px 10px;text-align:center;min-width:0}
+    .ingredient.selected{border-color:#d83a3d;box-shadow:0 0 0 1px #d83a3d inset}
+    .thumb{height:84px;display:grid;place-items:center;margin-bottom:6px}.ingredient img{max-width:100%;max-height:84px;object-fit:contain;display:block}
+    .ingredient .name{font-size:12px;font-weight:700;min-height:30px;display:flex;align-items:center;justify-content:center}
+    .ingredient .price{font-size:11px;color:#dbd7d2;white-space:nowrap}
+    .stepper{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:9px}.stepper button{border:0;width:29px;height:29px;border-radius:8px;background:#313131;color:#fff;font-size:19px}.stepper button.plus{background:var(--red)}.stepper b{font-size:13px;min-width:12px}
+    .bill{border:1px solid #333;border-radius:14px;padding:15px;margin-top:18px}.bill-head{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;padding-bottom:10px;border-bottom:1px solid #333}.bill-head strong{font-size:18px}.bill-head output{font-size:28px;font-weight:900;color:#f23537;white-space:nowrap}.bill-line{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:13px;color:#ddd}.bill-line span:last-child{white-space:nowrap}
+    .primary{width:100%;padding:16px 12px;border:0;border-radius:11px;background:var(--red);color:#fff;font-size:16px;font-weight:900;margin-top:14px}.primary:hover{background:#ff4347}
+    .subtle{background:#272727;color:#fff;border:1px solid #555;padding:12px;border-radius:9px}.actions{display:flex;gap:8px;margin-top:10px}.actions button{flex:1;font-size:12px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#202020;border:1px solid #f34b48;padding:12px 18px;border-radius:10px;display:none;z-index:30}
+    .modal-backdrop{position:fixed;inset:0;background:#000c;display:none;z-index:40;align-items:center;justify-content:center;padding:15px}.modal{background:#171717;border:1px solid #555;border-radius:17px;width:min(100%,520px);max-height:90vh;overflow:auto;padding:24px}.modal-top{display:flex;justify-content:space-between;align-items:center}.modal-top h2{margin:0 0 16px}.close{background:#333;border:0;color:#fff;border-radius:8px;font-size:20px;padding:5px 10px}
+    .cart-item{padding:12px 0;border-bottom:1px solid #3a3a3a;display:flex;justify-content:space-between;gap:10px}.muted{color:#aaa;font-size:13px}.form-field{display:block;margin:12px 0;font-size:13px}.form-field input,.form-field select,.form-field textarea{display:block;width:100%;margin-top:7px;background:#272727;border:1px solid #555;padding:12px;border-radius:9px;color:#fff}.form-field textarea{resize:vertical}
+    .footer{text-align:center;padding:25px;color:#aaa;font-size:12px}
+    @media (max-width:1180px){.layout{grid-template-columns:320px minmax(280px,1fr)}.builder{grid-column:1/-1}.pizza-stage{padding-top:80px}.ingredients{grid-template-columns:repeat(6,minmax(0,1fr))}}
+    @media (max-width:760px){.top{height:60px;padding:0 14px}.brand{font-size:24px}.nav{display:none}.layout{display:flex;flex-direction:column;padding:14px;gap:0}.lead h1{font-size:44px;margin:14px 0 12px}.lead p{margin-bottom:14px}.pizza-stage{order:1;position:relative;top:auto;padding:10px 0 20px}.builder{order:2;padding:14px}.ingredients{grid-template-columns:repeat(3,minmax(0,1fr))}.pizza-wrap{width:min(92vw,470px)}.tip{margin-top:14px}.panel{padding:14px}}
+    @media (max-width:375px){.ingredients{grid-template-columns:repeat(2,minmax(0,1fr))}.option-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">🍕 Pizza <span>House</span></div>
+    <nav class="nav">
+      <a href="#pocetna">Početna</a>
+      <a class="current" href="#builder">Napravi svoju pizzu</a>
+      <a href="#kontakt">Kontakt</a>
+    </nav>
+    <button class="header-cart" id="cartTrigger">🛒 Korpa <span id="cartCount">0</span></button>
+  </header>
+
+  <main class="layout" id="pocetna">
+    <section class="lead">
+      <h1>Napravi<br><span>svoju pizzu</span></h1>
+      <p>Počni od prazne napolitanske podloge od 28 cm, izaberi realan sos i pravi sir, pa dodaj sastojke. Sve se odmah vidi na pizzi i računa u cenu.</p>
+      <div class="panel">
+        <h3>1. Pizza podloga</h3>
+        <div class="size-card">
+          <div class="size-badge">28 cm</div>
+          <div class="size-copy">
+            <strong>Napolitanska podloga</strong>
+            <small>Prazna baza • 28 cm • 650 RSD</small>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>2. Kako funkcioniše</h3>
+        <div class="info-list">
+          <div class="info-pill"><div class="emoji">🍅</div><div>Izabrani <strong>sos ide preko cele podloge</strong> kao pravi foto-sloj.</div></div>
+          <div class="info-pill"><div class="emoji">🧀</div><div>Izabrani <strong>sir se dodaje kao realna slika</strong> preko sosa.</div></div>
+          <div class="info-pill"><div class="emoji">➕</div><div>Kulen, masline i ostali dodaci se raspoređuju <strong>po celoj pizzi</strong>.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pizza-stage">
+      <div class="pizza-wrap">
+        <img class="pizza-image" src="assets/podloga-28.png" alt="Prazna napolitanska pizza podloga od 28 cm">
+        <div id="visualToppings"></div>
+      </div>
+      <div class="tip">🍕 Napolitanska podloga 28 cm • prvo sos, zatim sir, pa dodaci</div>
+    </section>
+
+    <section class="builder" id="builder">
+      <h2>3. Izaberi sos</h2>
+      <div class="option-grid" id="sauceOptions"></div>
+      <h2>4. Izaberi sir</h2>
+      <div class="option-grid" id="cheeseOptions"></div>
+      <h2>5. Dodaj sastojke</h2>
+      <div class="ingredients" id="ingredients"></div>
+      <div class="bill">
+        <div class="bill-head"><strong>Ukupna cena</strong><output id="total">0 RSD</output></div>
+        <div id="breakdown"></div>
+        <button class="primary" id="addCart">🛒 Dodaj u korpu</button>
+        <div class="actions"><button class="subtle" id="reset">↺ Resetuj pizzu</button><button class="subtle" id="showCart">Pogledaj korpu →</button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="kontakt" class="footer">Pizza House — demo sajt. Fotografije i cene su ilustrativne; pre objavljivanja unesi svoje prave cene i kontakt podatke.</footer>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div class="modal-top"><h2>🛒 Tvoja korpa</h2><button class="close" id="closeModal" aria-label="Zatvori">×</button></div>
+      <div id="cartContents"></div>
+      <form id="checkout">
+        <label class="form-field">Ime i prezime<input id="customerName" required placeholder="Ime i prezime"></label>
+        <label class="form-field">Telefon<input id="customerPhone" required type="tel" placeholder="06x xxx xxxx"></label>
+        <label class="form-field">Način preuzimanja<select id="delivery"><option value="Dostava">Dostava</option><option value="Lično preuzimanje">Lično preuzimanje</option></select></label>
+        <label class="form-field" id="addressField">Adresa<input id="customerAddress" placeholder="Ulica i broj"></label>
+        <label class="form-field">Napomena<textarea id="note" rows="2" placeholder="Sprat, interfon, posebne želje..."></textarea></label>
+        <button type="submit" class="primary">Kopiraj porudžbinu</button>
+        <p class="muted">Demo: porudžbina se kopira u clipboard. Za pravo naručivanje sajt se povezuje sa backendom, mejlom, WhatsApp-om ili POS sistemom.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const A='assets/';
+    const base={label:'Napolitanska podloga 28 cm',price:650};
+    const sauces=[
+      {id:'none',label:'Bez sosa',price:0},
+      {id:'paradajz',label:'Paradajz sos',price:0,image:'sos-paradajz.png'},
+      {id:'beli',label:'Beli sos',price:50,image:'sos-beli.png'},
+      {id:'pesto',label:'Pesto sos',price:70,image:'sos-pesto.png'}
+    ];
+    const cheeses=[
+      {id:'none',label:'Bez sira',price:0},
+      {id:'mocarela',label:'Mocarela',price:120,image:'sir-mocarela.png'},
+      {id:'gauda',label:'Gauda',price:100,image:'sir-gauda.png'},
+      {id:'parmezan',label:'Parmezan',price:150,image:'sir-parmezan.png'}
+    ];
+    const toppings=[
+      {id:'sunka',label:'Šunka',price:120,size:20,copies:[0,8,28,38]},
+      {id:'kulen',label:'Kulen',price:150,size:11,copies:[0,20,32,44]},
+      {id:'pecurke',label:'Pečurke',price:50,size:11.5,copies:[0,16,24,32]},
+      {id:'masline',label:'Masline',price:50,size:7.5,copies:[0,24,36,50]},
+      {id:'paprika',label:'Paprika',price:50,size:11,copies:[0,14,22,30]},
+      {id:'luk',label:'Crveni luk',price:50,size:10.5,copies:[0,16,24,32]},
+      {id:'kukuruz',label:'Kukuruz',price:50,size:5.8,copies:[0,40,62,86]},
+      {id:'ananas',label:'Ananas',price:100,size:9,copies:[0,12,18,24]},
+      {id:'jalapeno',label:'Jalapeno',price:80,size:9,copies:[0,11,28,38]},
+      {id:'slanina',label:'Slanina',price:120,size:14,copies:[0,10,16,22]},
+      {id:'tuna',label:'Tuna',price:130,size:7,copies:[0,24,36,48]},
+      {id:'paradajz',label:'Paradajz',price:60,size:9.5,copies:[0,12,18,24]}
+    ];
+
+    let state={size:'28',sauce:'none',cheese:'none',items:{}};
+    let cart=JSON.parse(localStorage.getItem('pizzaCart')||'[]');
+    const money=n=>n.toLocaleString('sr-RS')+' RSD';
+    const el=id=>document.getElementById(id);
+
+    function total(){
+      return base.price + sauces.find(x=>x.id===state.sauce).price + cheeses.find(x=>x.id===state.cheese).price + toppings.reduce((sum,x)=>sum+x.price*(state.items[x.id]||0),0);
+    }
+
+    function renderOptionGrid(target, items, key){
+      el(target).innerHTML=items.map(x=>`<button type="button" class="option-card ${(state[key]===x.id)?'active':''}" data-${key}="${x.id}" aria-pressed="${state[key]===x.id}">${x.image?`<img src="${A+x.image}" alt="">`:'<span class="swatch"></span>'}<span>${x.label}<small>${x.price?`+${money(x.price)}`:'Besplatno'}</small></span></button>`).join('');
+    }
+
+    function renderIngredients(){
+      el('ingredients').innerHTML=toppings.map(x=>{const n=state.items[x.id]||0;return `<div class="ingredient ${n?'selected':''}"><div class="thumb"><img src="${A+x.id}.png" alt="${x.label}" loading="lazy"></div><div class="name">${x.label}</div><div class="price">+${money(x.price)}</div><div class="stepper"><button data-top="${x.id}" data-step="-1" aria-label="Ukloni ${x.label}">−</button><b>${n}</b><button class="plus" data-top="${x.id}" data-step="1" aria-label="Dodaj ${x.label}">+</button></div></div>`}).join('');
+    }
+
+    function renderBill(){
+      el('total').textContent=money(total());
+      const lines=[
+        [base.label,base.price],
+        [sauces.find(x=>x.id===state.sauce).label,sauces.find(x=>x.id===state.sauce).price],
+        [cheeses.find(x=>x.id===state.cheese).label,cheeses.find(x=>x.id===state.cheese).price],
+        ...toppings.filter(x=>state.items[x.id]).map(x=>[`${x.label} (${state.items[x.id]}×)`,x.price*state.items[x.id]])
+      ];
+      el('breakdown').innerHTML=lines.map(x=>`<div class="bill-line"><span>${x[0]}</span><span>${money(x[1])}</span></div>`).join('');
+    }
+
+    function hashString(str){let h=2166136261; for(let i=0;i<str.length;i++){h^=str.charCodeAt(i); h=Math.imul(h,16777619)} return h>>>0;}
+    function seeded(seed){return ()=>{seed=(seed*1664525+1013904223)>>>0; return seed/4294967296;};}
+
+    function renderVisual(){
+      let layers='';
+      const sauce=sauces.find(x=>x.id===state.sauce);
+      const cheese=cheeses.find(x=>x.id===state.cheese);
+      if(sauce.image) layers += `<div class="overlay-layer sauce" style="background-image:url('${A+sauce.image}')"></div>`;
+      if(cheese.image) layers += `<div class="overlay-layer cheese" style="background-image:url('${A+cheese.image}')"></div>`;
+
+      let tops='';
+      toppings.forEach(top=>{
+        const level=state.items[top.id]||0;
+        const copies=top.copies[level]||0;
+        if(!copies) return;
+        const rand=seeded(hashString(top.id+':'+level));
+        const golden=Math.PI*(3-Math.sqrt(5));
+        const edgePadding=Math.max(7, top.size*0.55);
+        const maxR=44-edgePadding;
+        const ringJitter=2.2;
+        for(let i=0;i<copies;i++){
+          const t=(i+0.5)/copies;
+          const radius=Math.sqrt(t)*maxR;
+          const angle=i*golden + rand()*0.9;
+          const jitterR=(rand()-0.5)*ringJitter;
+          const jitterA=(rand()-0.5)*0.55;
+          const x=50 + Math.cos(angle+jitterA)*(radius+jitterR);
+          const y=50 + Math.sin(angle+jitterA)*(radius+jitterR);
+          const rotation=Math.round(rand()*360);
+          const scale=0.9 + rand()*0.22;
+          tops += `<div class="topping-visual" style="left:${x}%;top:${y}%;width:${top.size}%;height:${top.size}%;transform:translate(-50%,-50%) rotate(${rotation}deg) scale(${scale});background-image:url('${A+top.id}.png')"></div>`;
+        }
+      });
+      el('visualToppings').innerHTML=layers+tops;
+    }
+
+    function renderCartCount(){el('cartCount').textContent=cart.length;}
+    function saveCart(){localStorage.setItem('pizzaCart',JSON.stringify(cart)); renderCartCount();}
+    function render(){renderOptionGrid('sauceOptions',sauces,'sauce'); renderOptionGrid('cheeseOptions',cheeses,'cheese'); renderIngredients(); renderBill(); renderVisual(); renderCartCount();}
+
+    document.addEventListener('click',e=>{
+      const sauceBtn=e.target.closest('[data-sauce]'); if(sauceBtn){state.sauce=sauceBtn.dataset.sauce; render();}
+      const cheeseBtn=e.target.closest('[data-cheese]'); if(cheeseBtn){state.cheese=cheeseBtn.dataset.cheese; render();}
+      const step=e.target.closest('[data-top]'); if(step){const id=step.dataset.top; state.items[id]=Math.max(0,Math.min(3,(state.items[id]||0)+Number(step.dataset.step))); render();}
+    });
+
+    function flash(msg){const t=el('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(window.toastTimeout); window.toastTimeout=setTimeout(()=>t.style.display='none',2600);}
+    el('reset').onclick=()=>{state={size:'28',sauce:'none',cheese:'none',items:{}}; render();};
+    el('addCart').onclick=()=>{cart.push({state:JSON.parse(JSON.stringify(state)), price:total()}); saveCart(); flash('🍕 Pizza je dodata u korpu!');};
+
+    function showModal(){
+      el('modal').style.display='flex';
+      const totalCart=cart.reduce((a,x)=>a+x.price,0);
+      el('cartContents').innerHTML=cart.length ? cart.map((c,i)=>{
+        const details=`Sos: ${sauces.find(x=>x.id===(c.state.sauce||'none')).label}; Sir: ${cheeses.find(x=>x.id===(c.state.cheese||'none')).label}; ` + (toppings.filter(x=>c.state.items[x.id]).map(x=>`${x.label} ×${c.state.items[x.id]}`).join(', ') || 'bez drugih dodataka');
+        return `<div class="cart-item"><div><strong>Pizza 28 cm</strong><div class="muted">${details}</div></div><div style="text-align:right"><strong>${money(c.price)}</strong><br><button class="close" data-remove="${i}" aria-label="Ukloni pizzu" style="font-size:13px;margin-top:8px">Ukloni</button></div></div>`;
+      }).join('') + `<h3>Ukupno: ${money(totalCart)}</h3>` : '<p>Korpa je prazna. Napravi svoju pizzu!</p>';
+      el('checkout').style.display=cart.length?'block':'none';
+    }
+
+    el('cartTrigger').onclick=showModal; el('showCart').onclick=showModal; el('closeModal').onclick=()=>el('modal').style.display='none';
+    el('modal').onclick=e=>{ if(e.target===el('modal')) el('modal').style.display='none'; const r=e.target.closest('[data-remove]'); if(r){cart.splice(Number(r.dataset.remove),1); saveCart(); showModal();} };
+    el('delivery').onchange=()=>{const need=el('delivery').value==='Dostava'; el('addressField').style.display=need?'block':'none'; el('customerAddress').required=need;}; el('delivery').dispatchEvent(new Event('change'));
+    el('checkout').onsubmit=async e=>{
+      e.preventDefault(); if(!cart.length) return;
+      const order=`PIZZA HOUSE - PORUDŽBINA\n${cart.map((c,i)=>{const items=toppings.filter(x=>c.state.items[x.id]).map(x=>`${x.label} x${c.state.items[x.id]}`).join(', ')||'bez drugih dodataka'; return `${i+1}. Pizza 28 cm, sos: ${sauces.find(x=>x.id===(c.state.sauce||'none')).label}, sir: ${cheeses.find(x=>x.id===(c.state.cheese||'none')).label}, ${items} — ${money(c.price)}`;}).join('\n')}\nUKUPNO: ${money(cart.reduce((s,x)=>s+x.price,0))}\nIme: ${el('customerName').value}\nTelefon: ${el('customerPhone').value}\nPreuzimanje: ${el('delivery').value}\nAdresa: ${el('customerAddress').value}\nNapomena: ${el('note').value}`;
+      try{await navigator.clipboard.writeText(order); flash('Porudžbina kopirana!'); el('modal').style.display='none';}catch{window.prompt('Kopiraj porudžbinu:',order);}
+    };
+    render();
+  </script>
+</body>
+</html>
